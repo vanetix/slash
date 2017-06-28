@@ -31,6 +31,7 @@ defmodule SlackCommand.Mixfile do
   defp deps do
     [{:plug, "~> 1.3"},
      {:cowboy, "~> 1.1"},
-     {:poison, "~> 3.1"}]
+     {:poison, "~> 3.1"},
+     {:credo, "~> 0.8", only: [:dev, :test], runtime: false}]
   end
 end
