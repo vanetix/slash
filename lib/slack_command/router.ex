@@ -9,7 +9,7 @@ defmodule SlackCommand.Router do
 
       plug Plug.Logger
       plug Plug.Parsers,
-        parsers: [:json],
+        parsers: [:json, :urlencoded],
         json_decoder: Poison
       plug :match
       plug :dispatch
