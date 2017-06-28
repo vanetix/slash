@@ -29,4 +29,4 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
-config SlackCommand, port: 8080
+config :slack_command, port: 8080
