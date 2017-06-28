@@ -24,11 +24,14 @@ defmodule SlackCommand.Router do
             {422, %{error: "No text specified"}}
           end
 
-        send_resp(var!(conn), status, Poison.encode!(resp))
+        var!(conn)
+        |> put_resp_content_type("application/json")
+        |> send_resp(status, Poison.encode!(resp))
       end
 
       match _ do
         var!(conn)
+        |> put_resp_content_type("application/json")
         |> send_resp(404, Poison.encode!(%{error: "Not found"}))
       end
 
