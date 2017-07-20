@@ -5,8 +5,9 @@ defmodule SlackCommand.Mixfile do
     [app: :slack_command,
      version: "0.1.0",
      elixir: "~> 1.4",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
+     name: "slack_command",
+     description: "Library for helping in the creation of slack slash commands",
+     package: package(),
      deps: deps()]
   end
 
@@ -33,6 +34,13 @@ defmodule SlackCommand.Mixfile do
     [{:plug, "~> 1.3"},
      {:cowboy, "~> 1.1"},
      {:poison, "~> 3.1"},
-     {:credo, "~> 0.8", only: [:dev, :test], runtime: false}]
+     {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+     {:ex_doc, "~> 0.16.2", only: :dev}]
+  end
+
+  defp package do
+    [maintainers: ["Matthew McFarland"],
+     licenses: ["MIT"],
+     links: %{"Github" => "https://github.com/vanetix/slack_command"}]
   end
 end
