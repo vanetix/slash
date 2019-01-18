@@ -4,7 +4,9 @@
 
 ## Documentation
 
-Documentation can be found at [https://hexdocs.pm/slack_command](https://hexdocs.pm/slack_command). If you're not sure what a Slack slash command is, see the [Slack documentation](https://api.slack.com/slash-commands).
+Documentation can be found at [https://hexdocs.pm/slack_command](https://hexdocs.pm/slack_command).
+
+If you're not sure what a Slack slash command is, see the [Slack documentation](https://api.slack.com/slash-commands).
 
 ## Installation
 

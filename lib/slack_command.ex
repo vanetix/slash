@@ -1,3 +1,3 @@
 defmodule SlackCommand do
-  @doc false
+  @moduledoc false
 end
