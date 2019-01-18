@@ -156,6 +156,9 @@ defmodule SlackCommand.Router do
       {command, args} = normalize_arguments(params["text"])
 
       case try_handle(router, command, conn, args) do
+        message when is_binary(message) ->
+          send_json(conn, %{text: message})
+
         %Message{} = message ->
           body = Map.take(message, [:text, :attachments])
 

@@ -37,6 +37,21 @@ defmodule SlackCommand.RouterTest do
     test "should allow authenticated?/1 to be overridden" do
       assert MockRouter.authenticated?("token")
     end
+
+    test "should handle unmatched clauses with help" do
+      assert {:ok, help} = MockRouter.do_command("help", %{}, [])
+      assert {:ok, ^help} = MockRouter.do_command("bogus_command", %{}, [])
+    end
+
+    test "should respond to ping command" do
+      assert %{resp_body: body} = command("ping")
+      assert %{"text" => "pong"} = Jason.decode!(body)
+    end
+
+    test "should respond to hello command" do
+      assert %{resp_body: body} = command("hello friend")
+      assert %{"text" => "hello friend!"} = Jason.decode!(body)
+    end
   end
 
   describe "SlackCommand.Router" do
