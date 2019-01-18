@@ -30,7 +30,10 @@ defmodule SlackCommand.Router do
 
   @doc false
   defmacro __before_compile__(%{module: module}) do
-    compile(Module.get_attribute(module, :commands))
+    name = Module.get_attribute(module, :router_name)
+    commands = Module.get_attribute(module, :commands)
+
+    compile(name, commands)
   end
 
   @doc """
@@ -72,13 +75,13 @@ defmodule SlackCommand.Router do
   end
 
   @doc false
-  def compile(commands) do
+  def compile(name, commands) do
     ast =
       for {name, arguments, _help, block} <- commands do
         compile_command(name, arguments, block)
       end
 
-    help_ast = compile_help(commands)
+    help_ast = compile_help(name, commands)
 
     quote do
       def do_command(command, conn, _args \\ [])
@@ -87,7 +90,7 @@ defmodule SlackCommand.Router do
     end
   end
 
-  defp compile_help(commands) do
+  defp compile_help(name, commands) do
     help_text =
       commands
       |> Enum.sort_by(&elem(&1, 0))
@@ -110,7 +113,7 @@ defmodule SlackCommand.Router do
       def do_command(_help, _conn, _args) do
         {:ok,
          %Message{
-           text: "#{@router_name} supports the following commands:",
+           text: unquote(name) <> " supports the following commands:",
            attachments: unquote(help_text)
          }}
       end
