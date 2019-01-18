@@ -16,11 +16,20 @@ jobs:
       - run: mix compile
       - run: mix test
       - run: mix credo --mute-exit-status
-      - run: MIX_ENV=test mix dialyzer
-      - run: MIX_ENV=test mix inch.report
       - save_cache:
           key: dependency-cache-{{ checksum "mix.lock" }}
           paths:
             - _build
             - deps
             - ~/.mix
+      - restore_cache:
+          keys:
+            - dialyzer-cache-{{ checksum "mix.lock" }}
+      - run: MIX_ENV=test mix dialyzer --plt
+      - save_cache:
+          key: dialyzer-cache-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+            - ~/.mix
+      - run: MIX_ENV=test mix dialyzer --halt-exit-status
+      - run: MIX_ENV=test mix inch.report
