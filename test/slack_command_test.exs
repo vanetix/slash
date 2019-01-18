@@ -11,11 +11,31 @@ defmodule SlackCommand.RouterTest do
     defcommand hello(_, name) do
       "hello #{name}!"
     end
+
+    def authenticated?(_token) do
+      true
+    end
+  end
+
+  def command(text) do
+    params = %{
+      "user_id" => "bob1",
+      "token" => "not_used",
+      "text" => text
+    }
+
+    :post
+    |> Plug.Test.conn("/", params)
+    |> MockRouter.call([])
   end
 
   describe "MockRouter" do
     test "should define do_command/3" do
       assert function_exported?(MockRouter, :do_command, 3)
+    end
+
+    test "should allow authenticated?/1 to be overridden" do
+      assert MockRouter.authenticated?("token")
     end
   end
 

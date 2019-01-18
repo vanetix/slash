@@ -20,11 +20,15 @@ defmodule SlackCommand.Router do
       Module.put_attribute(__MODULE__, :router_name, unquote(name))
       Module.register_attribute(__MODULE__, :commands, accumulate: true)
 
+      defdelegate authenticated?(token), to: SlackCommand.Router
+
       def init(opts \\ []), do: opts
 
       def call(%Conn{} = conn, opts) do
         SlackCommand.Router.handle(__MODULE__, conn)
       end
+
+      defoverridable authenticated?: 1
     end
   end
 
@@ -41,6 +45,12 @@ defmodule SlackCommand.Router do
   """
   @callback do_command(String.t(), Conn.t(), list(String.t())) ::
               Message.t() | {:ok, Message.t()} | {:ok, String.t() | {:error, String.t()}}
+
+  @doc """
+  Authenticates the connection, the default implementation just verifies that the received
+  token in the payload matches the configured value.
+  """
+  @callback authenticated?(String.t()) :: boolean()
 
   @doc """
   Defines a Slack command by decomposing the function head. The first argument
@@ -142,7 +152,7 @@ defmodule SlackCommand.Router do
   def handle(router, %Conn{method: "POST", path_info: []} = conn) do
     params = Map.get(conn, :body_params, %{})
 
-    if authenticated?(params["token"]) do
+    if router.authenticated?(params["token"]) do
       {command, args} = normalize_arguments(params["text"])
 
       case try_handle(router, command, conn, args) do
@@ -207,10 +217,10 @@ defmodule SlackCommand.Router do
     end
   end
 
-  defp authenticated?(token) do
+  def authenticated?(token) do
     verify_token =
       :slack_command
-      |> Application.get_env(__MODULE__, [])
+      |> Application.get_all_env()
       |> Keyword.fetch!(:verify_token)
 
     token == verify_token
