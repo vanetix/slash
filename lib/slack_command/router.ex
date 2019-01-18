@@ -88,7 +88,9 @@ defmodule SlackCommand.Router do
   def compile(name, commands) do
     ast =
       for {name, arguments, _help, block} <- commands do
-        compile_command(name, arguments, block)
+        name
+        |> to_string()
+        |> compile_command(arguments, block)
       end
 
     help_ast = compile_help(name, commands)
@@ -194,12 +196,7 @@ defmodule SlackCommand.Router do
       |> String.split()
       |> Enum.map(&String.trim/1)
 
-    command =
-      command
-      |> undasherize()
-      |> String.to_atom()
-
-    {command, rest}
+    {undasherize(command), rest}
   end
 
   defp send_json(conn, response, status \\ 200) do
