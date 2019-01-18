@@ -11,7 +11,14 @@ defmodule SlackCommand.Mixfile do
       name: "slack_command",
       description: "Plug builder for the routing of Slack slash commands",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      docs: [
+        main: "readme",
+        source_url: "https://github.com/vanetix/slack_command",
+        extras: [
+          "README.md",
+        ]
+      ]
     ]
   end
 
@@ -36,7 +43,7 @@ defmodule SlackCommand.Mixfile do
     [
       maintainers: ["Matthew McFarland"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/vanetix/slack_command"}
+      links: %{github: "https://github.com/vanetix/slack_command"}
     ]
   end
 end
