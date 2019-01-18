@@ -44,7 +44,9 @@ defmodule SlackCommand.Router do
   Process the command given from slack.
   """
   @callback do_command(String.t(), Conn.t(), list(String.t())) ::
-              Message.t() | {:ok, Message.t()} | {:ok, String.t() | {:error, String.t()}}
+              Message.t()
+              | {:ok, Message.t()}
+              | {:ok, String.t() | {:error, String.t()}}
 
   @doc """
   Authenticates the connection, the default implementation just verifies that the received
@@ -137,7 +139,8 @@ defmodule SlackCommand.Router do
     arity = length(arguments)
 
     quote location: :keep do
-      def do_command(unquote(name), conn, args) when length(args) == unquote(arity - 1) do
+      def do_command(unquote(name), conn, args)
+          when length(args) == unquote(arity - 1) do
         unquote(arguments) = [conn | args]
         unquote(block)
       end
