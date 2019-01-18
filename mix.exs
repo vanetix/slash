@@ -34,7 +34,7 @@ defmodule SlackCommand.Mixfile do
       {:jason, "~> 1.1"},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.19.2", only: [:dev, :test]},
+      {:ex_doc, "~> 0.18.0", only: [:dev, :test]},
       {:inch_ex, "~> 2.0", only: [:test]}
     ]
   end
