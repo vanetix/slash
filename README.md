@@ -21,9 +21,13 @@ end
 
 ## Usage
 
-Since the provided `SlackCommand.Router` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
+<!-- moduledoc -->
 
-### Example usage in a Plug.Router
+Provides a primary macro `defcommand` to enable building a Plug that can route inbound requests from Slack with a familiar interface (functions).
+
+Since `SlackCommand.Router` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
+
+### Example Usage
 
 ```elixir
 defmodule SlackBot.SlackRouter do
@@ -38,12 +42,16 @@ defmodule SlackBot.Router do
   use Plug.Router
 
   plug :match
+  plug Plug.Parsers, parsers: [:json],
+                     pass:  ["application/json"],
+                     json_decoder: Jason
   plug :dispatch
 
   forward "/slack", to: SlackBot.SlackRouter
 end
 ```
 
+<!-- moduledoc -->
 
 ## License (MIT)
 

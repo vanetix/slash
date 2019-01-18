@@ -1,7 +1,8 @@
 defmodule SlackCommand.Router do
-  @moduledoc """
-  Utility module for defining a new plug router for handling Slack slash commands.
-  """
+  @moduledoc "README.md"
+             |> File.read!()
+             |> String.split("<!-- moduledoc -->")
+             |> Enum.fetch!(1)
 
   alias Plug.Conn
   alias SlackCommand.Message
