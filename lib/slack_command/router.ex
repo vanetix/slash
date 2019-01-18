@@ -34,13 +34,24 @@ defmodule SlackCommand.Router do
   end
 
   @doc """
-    Process the command given from slack.
+  Process the command given from slack.
   """
   @callback do_command(String.t(), Conn.t(), list(String.t())) ::
               Message.t() | {:ok, Message.t()} | {:ok, String.t() | {:error, String.t()}}
 
   @doc """
-  Defines a Slack command
+  Defines a Slack command by decomposing the function head. The first argument
+  is the `%Plug.Conn{}` struct and is **always** required.
+
+  #### For example:
+
+  ```elixir
+  defcommand ping(_) do
+    "pong"
+  end
+  ```
+
+  Which will then translate to then slash command in Slack `/bot ping`.
   """
   defmacro defcommand(head_ast, do: block) do
     {name, args} = Macro.decompose_call(head_ast)
@@ -60,7 +71,8 @@ defmodule SlackCommand.Router do
     end
   end
 
-  defp compile(commands) do
+  @doc false
+  def compile(commands) do
     ast =
       for {name, arguments, _help, block} <- commands do
         compile_command(name, arguments, block)

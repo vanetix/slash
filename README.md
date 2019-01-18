@@ -1,6 +1,10 @@
 # SlackCommand
 
-> A simple command router for Slack slash commands
+> A simple Slack slash command builder that integrates with Plug.
+
+## Documentation
+
+Documentation can be found at [https://hexdocs.pm/slack_command](https://hexdocs.pm/slack_command). If you're not sure what a Slack slash command is, see the [Slack documentation](https://api.slack.com/slash-commands).
 
 ## Installation
 
@@ -9,17 +13,39 @@ by adding `slack_command` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:slack_command, "~> 0.1.0"}]
+  [{:slack_command, "~> 1.0.0"}]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/slack_command](https://hexdocs.pm/slack_command).
+## Usage
+
+Since the provided `SlackCommand.Router` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
+
+### Example usage in a Plug.Router
+
+```elixir
+defmodule SlackBot.SlackRouter do
+  use SlackCommand.Router
+
+  defcommand hello(_, name) do
+    "Greetings #{name}!"
+  end
+end
+
+defmodule SlackBot.Router do
+  use Plug.Router
+
+  plug :match
+  plug :dispatch
+
+  forward "/slack", to: SlackBot.SlackRouter
+end
+```
+
 
 ## License (MIT)
 
-Copyright (c) 2017 Matt McFarland
+Copyright (c) 2017-2019 Matt McFarland
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
