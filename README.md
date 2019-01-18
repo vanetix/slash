@@ -1,5 +1,8 @@
 # SlackCommand
 
+[![CircleCI](https://circleci.com/gh/vanetix/slack_command.svg?style=svg)](https://circleci.com/gh/vanetix/slack_command)
+[![Documentation](http://inch-ci.org/github/vanetix/slack_command.svg)](http://inch-ci.org/github/vanetix/slack_command)
+
 > A simple Slack slash command builder that integrates with Plug.
 
 ## Documentation
