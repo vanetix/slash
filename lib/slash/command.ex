@@ -32,6 +32,7 @@ defmodule Slash.Command do
           channel_id: String.t(),
           channel_name: String.t(),
           command: String.t(),
+          data: map(),
           enterprise_id: String.t(),
           enterprise_name: String.t(),
           response_url: String.t(),
