@@ -74,10 +74,7 @@ defmodule Slash.Builder do
       def init(_opts), do: []
 
       @doc false
-      def call(
-            %Conn{method: "POST", path_info: [], body_params: body} = conn,
-            _opts
-          ) do
+      def call(%Conn{method: "POST", path_info: [], body_params: body} = conn, _opts) do
         with {:ok, command} <- Command.from_params(body),
              true <- verify_request(__MODULE__, conn),
              {:ok, %Command{} = command} <- run_before_functions(command) do
@@ -92,10 +89,6 @@ defmodule Slash.Builder do
           {:error, message} ->
             send_json(conn, %{text: message}, 200)
         end
-      end
-
-      def call(%Conn{} = conn, _opts) do
-        send_json(conn, %{error: "Not found"}, 404)
       end
     end
   end
