@@ -1,6 +1,26 @@
 defmodule Slash.Builder do
-  @moduledoc """
+  @moduledoc ~S"""
+  `Slash.Builder` is responsible for building the actual plug that can be used in a
+  [Plug](https://hexdocs.pm/plug/readme.html) pipeline.
 
+  The main macro provided when using the module is `command/2`, which allows you to declare
+  commands for your Slash plug.
+
+  ## Basic Usage
+
+  ```elixir
+  defmodule Bot.SlackRouter do
+    use Slash.Builder
+
+    command :greet, fn %{args: args} ->
+      case args do
+        [name] ->
+          "Hello #{name}!"
+        _ ->
+          "Please pass name to greet"
+      end
+    end
+  end
   """
 
   alias Plug.Conn
@@ -17,10 +37,15 @@ defmodule Slash.Builder do
   ]
 
   @typedoc """
-  Valid return types from command handler functions. See `Slash.Builder.command/1`
+  Valid return types from command handler functions. See `Slash.Builder.command/2`
   for more information.
   """
   @type command_response :: binary() | map() | :async
+
+  @typedoc """
+  Valid return values for a before handler function. See `Slash.Builder.before/1` for more information.
+  """
+  @type before_response :: {:ok, Command.t()} | {:error, String.t()}
 
   @doc false
   defmacro __using__(opts) do
@@ -94,6 +119,13 @@ defmodule Slash.Builder do
   Defines a command for the Slack router, the first argument is always a `Slash.Command`
   struct.
 
+  The `name` argument should be the command name you would like to define, this should be an
+  internal name, for example `greet_user`. This will then ran through
+  `SlackCommand.Formatter.Dasherized` by default, creating the Slack command `greet-user`.
+
+  The `func` argument will be your function which is invoked on command route match, ***this
+  function will always receive the `%Slash.Command{}` struct as an argument***.
+
   TODO: This needs to verify the arity of `func`.
   """
   @spec command(atom(), (Command.t() -> command_response())) :: Macro.t()
@@ -112,7 +144,11 @@ defmodule Slash.Builder do
   @doc """
   Defines a function to be executed before the command is routed to the appropriate handler
   function.
+
+  The `function_name` should be a reference to the name of the function on the current module.
+  Values returned from a before function should match the `t:before_response/0` type.
   """
+  @spec before(atom()) :: Macro.t()
   defmacro before(function_name) when is_atom(function_name) do
     quote do
       @before_functions unquote(function_name)
