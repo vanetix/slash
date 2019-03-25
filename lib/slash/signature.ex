@@ -15,9 +15,12 @@ defmodule Slash.Signature do
   def generate(secret, timestamp, body) do
     data = @version <> ":" <> timestamp <> ":" <> body
 
-    :sha256
-    |> :crypto.hmac(secret, data)
-    |> Base.encode16(case: :lower)
+    hash =
+      :sha256
+      |> :crypto.hmac(secret, data)
+      |> Base.encode16(case: :lower)
+
+    "v0=" <> hash
   end
 
   @doc """

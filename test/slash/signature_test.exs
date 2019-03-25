@@ -12,7 +12,7 @@ defmodule Slash.SignatureTest do
       assert signature = generate("foo", timestamp, "body")
 
       assert signature ==
-               "8bfff1e77496dbc2ec9835c5b455e7705dffa32ff3bc69f13b82c297d39aea47"
+               "v0=8bfff1e77496dbc2ec9835c5b455e7705dffa32ff3bc69f13b82c297d39aea47"
     end
   end
 
