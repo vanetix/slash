@@ -1,24 +1,24 @@
-# SlackCommand
+# Slash
 
-[![CircleCI](https://circleci.com/gh/vanetix/slack_command.svg?style=svg)](https://circleci.com/gh/vanetix/slack_command)
-[![Documentation](http://inch-ci.org/github/vanetix/slack_command.svg)](http://inch-ci.org/github/vanetix/slack_command)
+[![CircleCI](https://circleci.com/gh/vanetix/slash.svg?style=svg)](https://circleci.com/gh/vanetix/slash)
+[![Documentation](http://inch-ci.org/github/vanetix/slash.svg)](http://inch-ci.org/github/vanetix/slash)
 
 > A simple Slack slash command builder that integrates with Plug.
 
 ## Documentation
 
-Documentation can be found at [https://hexdocs.pm/slack_command](https://hexdocs.pm/slack_command).
+Documentation can be found at [https://hexdocs.pm/slash](https://hexdocs.pm/slash).
 
 If you're not sure what a Slack slash command is, see the [Slack documentation](https://api.slack.com/slash-commands).
 
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `slack_command` to your list of dependencies in `mix.exs`:
+by adding `slash` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:slack_command, "~> 1.0.0"}]
+  [{:slash, "~> 2.0.0"}]
 end
 ```
 
@@ -26,17 +26,22 @@ end
 
 <!-- moduledoc -->
 
-Provides a primary macro `defcommand` to enable building a Plug that can route inbound requests from Slack with a familiar interface (functions).
+Provides a primary macro `command/2` to enable building a Plug that can route inbound requests from Slack with a familiar interface (functions).
 
-Since `SlackCommand.Router` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
+Since `Slash.Builder` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
 
 ### Example Usage
 
 ```elixir
 defmodule SlackBot.SlackRouter do
-  use SlackCommand.Router
+  use Slash.Builder
 
-  defcommand hello(_, name) do
+  @help """
+  Greets a user
+
+  Example: `/hello bob`
+  """
+  command fn %Command{args: [name | []]} ->
     "Greetings #{name}!"
   end
 end

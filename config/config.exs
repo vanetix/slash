@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :slack_command, key: :value
+#     config :slash, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:slack_command, :key)
+#     Application.get_env(:slash, :key)
 #
 # Or configure a 3rd-party app:
 #

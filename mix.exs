@@ -1,22 +1,23 @@
-defmodule SlackCommand.Mixfile do
+defmodule Slash.Mixfile do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "2.0.0-rc.1"
 
   def project do
     [
-      app: :slack_command,
+      app: :slash,
       version: @version,
       elixir: "~> 1.4",
-      name: "slack_command",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      name: "slash",
       description: "Plug builder for the routing of Slack slash commands",
       package: package(),
       deps: deps(),
       docs: [
         main: "readme",
-        source_url: "https://github.com/vanetix/slack_command",
+        source_url: "https://github.com/vanetix/slash",
         extras: [
-          "README.md",
+          "README.md"
         ]
       ]
     ]
@@ -34,8 +35,10 @@ defmodule SlackCommand.Mixfile do
       {:jason, "~> 1.1"},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.18.0", only: [:dev, :test]},
-      {:inch_ex, "~> 2.0", only: [:test]}
+      {:ex_doc, "~> 0.19.3", only: [:dev, :test]},
+      {:httpoison, "~> 1.5"},
+      {:inch_ex, "~> 2.0", only: [:test]},
+      {:mox, "~> 0.5.0", only: [:test]}
     ]
   end
 
@@ -43,7 +46,10 @@ defmodule SlackCommand.Mixfile do
     [
       maintainers: ["Matthew McFarland"],
       licenses: ["MIT"],
-      links: %{github: "https://github.com/vanetix/slack_command"}
+      links: %{github: "https://github.com/vanetix/slash"}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end
