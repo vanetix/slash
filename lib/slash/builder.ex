@@ -90,6 +90,10 @@ defmodule Slash.Builder do
             send_json(conn, %{text: message}, 200)
         end
       end
+
+      def call(%Conn{} = conn, _opts) do
+        send_json(conn, %{error: "Not found"}, 404)
+      end
     end
   end
 
