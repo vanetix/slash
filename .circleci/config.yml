@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/elixir:1.7
+      - image: circleci/elixir:1.8
     steps:
       - checkout
       - restore_cache:
