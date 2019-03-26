@@ -4,7 +4,25 @@ defmodule Slash.Test do
 
   ## Examples
 
-    use Slash.Test, signing_key: "foo"
+      defmodule Bot.SlackRouterTest do
+        use ExUnit.Case
+        use Plug.Test
+        use Slash.Test
+
+        alias Bot.SlackRouter
+
+        test "should encode response as json", %{conn: conn} do
+          conn =
+            :post
+            |> conn("/", %{})
+            |> send_command(SlackRouter, "greet")
+            |> SlackRouter.call([])
+
+          assert %Plug.Conn{resp_body: body} = conn
+          assert %{"text" => "Hello world!"} = Jason.decode!(body)
+        end
+      end
+
   """
 
   alias Plug.Conn

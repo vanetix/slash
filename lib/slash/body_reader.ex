@@ -7,9 +7,10 @@ defmodule Slash.BodyReader do
 
   ## Example
 
-    plug Plug.Parsers,
-      parsers: [:urlencoded],
-      body_reader: {Slash.BodyReader, :read_body, []}
+      plug Plug.Parsers,
+        parsers: [:urlencoded],
+        body_reader: {Slash.BodyReader, :read_body, []}
+
   """
 
   alias Plug.Conn

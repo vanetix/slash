@@ -8,30 +8,31 @@ defmodule Slash.Builder do
 
   ## Examples
 
-    defmodule Bot.SlackRouter do
-      use Slash.Builder
+      defmodule Bot.SlackRouter do
+        use Slash.Builder
 
-      before :verify_user
+        before :verify_user
 
-      command :greet, fn %{args: args} ->
-        case args do
-          [name] ->
-            "Hello #{name}!"
-          _ ->
-            "Please pass name to greet"
+        command :greet, fn %{args: args} ->
+          case args do
+            [name] ->
+              "Hello #{name}!"
+            _ ->
+              "Please pass name to greet"
+          end
+        end
+
+        def verify_user(%{user_id: user_id} = command) do
+          case Accounts.find_user_by_slack_id(user_id) do
+            nil ->
+              {:error, "User not authorized"}
+
+            user ->
+              {:ok, put_data(command, :user, user)}
+          end
         end
       end
 
-      def verify_user(%{user_id: user_id} = command) do
-        case Accounts.find_user_by_slack_id(user_id) do
-          nil ->
-            {:error, "User not authorized"}
-
-          user ->
-            {:ok, put_data(command, :user, user)}
-        end
-      end
-    end
   """
 
   alias Plug.Conn
