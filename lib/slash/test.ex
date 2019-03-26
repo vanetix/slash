@@ -28,6 +28,7 @@ defmodule Slash.Test do
   @spec send_command(Conn.t(), module :: atom(), command :: String.t()) :: Conn.t()
   def send_command(%Conn{} = conn, module, command) do
     params = build_params(command)
+    encoded_params = URI.encode_query(params)
 
     timestamp =
       DateTime.utc_now()
@@ -37,10 +38,11 @@ defmodule Slash.Test do
     signature =
       module
       |> maybe_put_signer_key()
-      |> Signature.generate(timestamp, Jason.encode!(params))
+      |> Signature.generate(timestamp, encoded_params)
 
     conn
     |> Map.put(:body_params, params)
+    |> Conn.put_private(:slash_raw_body, encoded_params)
     |> Conn.put_req_header("x-slack-signature", signature)
     |> Conn.put_req_header("x-slack-request-timestamp", timestamp)
   end
