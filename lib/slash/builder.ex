@@ -35,6 +35,8 @@ defmodule Slash.Builder do
 
   """
 
+  require Logger
+
   alias Plug.Conn
 
   alias Slash.{
@@ -279,7 +281,11 @@ defmodule Slash.Builder do
     try do
       module.match_command(cmd, command)
     rescue
-      _ ->
+      error ->
+        message = Exception.message(error)
+
+        Logger.error("Error while processing command '#{cmd}': #{message}.")
+
         "Failed to execute the command."
     end
   end
