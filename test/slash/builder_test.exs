@@ -154,7 +154,7 @@ defmodule Slash.BuilderTest do
         |> send_command(AsyncTaskMock, "async-task")
         |> AsyncTaskMock.call([])
 
-      assert %Plug.Conn{status: 200, resp_body: "{}"} = conn
+      assert %Plug.Conn{status: 200} = conn
       assert_receive :ok
     end
   end

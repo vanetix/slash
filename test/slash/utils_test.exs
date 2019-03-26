@@ -17,4 +17,24 @@ defmodule Slash.UtilsTest do
       assert ["application/json" <> _ | []] = Conn.get_resp_header(conn, "content-type")
     end
   end
+
+  describe "build_response_payload/1" do
+    test "should build binary payload" do
+      assert %{text: "message"} = build_response_payload("message")
+    end
+
+    test "should build map payload" do
+      assert %{key: :value} = build_response_payload(%{key: :value})
+    end
+
+    test "should build async payload" do
+      assert "" = build_response_payload(:async)
+    end
+
+    test "should raise for other types" do
+      assert_raise ArgumentError, fn ->
+        build_response_payload(:ok)
+      end
+    end
+  end
 end
