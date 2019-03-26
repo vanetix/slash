@@ -6,21 +6,20 @@ defmodule Slash.Builder do
   The main macro provided when using the module is `command/2`, which allows you to declare
   commands for your Slash plug.
 
-  ## Basic Usage
+  ## Examples
 
-  ```elixir
-  defmodule Bot.SlackRouter do
-    use Slash.Builder
+    defmodule Bot.SlackRouter do
+      use Slash.Builder
 
-    command :greet, fn %{args: args} ->
-      case args do
-        [name] ->
-          "Hello #{name}!"
-        _ ->
-          "Please pass name to greet"
+      command :greet, fn %{args: args} ->
+        case args do
+          [name] ->
+            "Hello #{name}!"
+          _ ->
+            "Please pass name to greet"
+        end
       end
     end
-  end
   """
 
   alias Plug.Conn
@@ -292,19 +291,29 @@ defmodule Slash.Builder do
   additional details.
   """
   @spec verify_request(module(), Conn.t()) :: boolean()
-  def verify_request(module, %Conn{body_params: body} = conn) do
+  def verify_request(module, %Conn{private: %{slash_raw_body: raw_body}} = conn) do
     with [signature | _] <- Conn.get_req_header(conn, "x-slack-signature"),
          [timestamp | _] <- Conn.get_req_header(conn, "x-slack-request-timestamp"),
          true <- valid_timestamp?(timestamp) do
       :slash
       |> Application.get_env(module, [])
       |> Keyword.fetch!(:signing_key)
-      |> Signature.generate(timestamp, Jason.encode!(body))
+      |> Signature.generate(timestamp, raw_body)
       |> Signature.verify(signature)
     else
       _ ->
         false
     end
+  end
+
+  def verify_request(_, _) do
+    raise RuntimeError, """
+    Please ensure that `Slash.BodyReader is used when configuring the Plug.Parsers plug.
+
+    plug Plug.Parsers,
+      parsers: [:urlencoded, ...],
+      body_reader: {Slash.BodyReader, :read_body, []}
+    """
   end
 
   # Verifies that the request timestamp isn't greater than a minute

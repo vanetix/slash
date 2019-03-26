@@ -2,9 +2,9 @@ defmodule Slash.Test do
   @moduledoc """
   Use this module for testing your plugs built with `Slash.Builder`.
 
-  ```
+  ## Examples
+
     use Slash.Test, signing_key: "foo"
-  ```
   """
 
   alias Plug.Conn

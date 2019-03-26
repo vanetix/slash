@@ -130,17 +130,15 @@ defmodule Slash.Command do
 
   - :timeout - specific the `Task.async/2` timeout option to be used.
 
-  ### Example usage
+  ### Examples
 
-  ```elixir
-  command :async_reply, fn command ->
-    async command, fn ->
-      Process.sleep(5_000)
+    command :async_reply, fn command ->
+      async command, fn ->
+        Process.sleep(5_000)
 
-      "Hello!"
+        "Hello!"
+      end
     end
-  end
-  ```
   """
   @spec async(t(), (() -> Slash.Builder.command_response()), keyword()) :: :async
   def async(command, func, opts \\ [])
