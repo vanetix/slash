@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/vanetix/slash.svg?style=svg)](https://circleci.com/gh/vanetix/slash)
 [![Documentation](http://inch-ci.org/github/vanetix/slash.svg)](http://inch-ci.org/github/vanetix/slash)
 
-> A simple Slack slash command builder that integrates with Plug.
+> A simple Slack slash command builder for Plug.
 
 ## Documentation
 
@@ -13,8 +13,7 @@ If you're not sure what a Slack slash command is, see the [Slack documentation](
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `slash` to your list of dependencies in `mix.exs`:
+Add `slash` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -24,42 +23,83 @@ end
 
 ## Usage
 
-<!-- moduledoc -->
-
 Provides a primary macro `command/2` to enable building a Plug that can route inbound requests from Slack with a familiar interface (functions).
 
 Since `Slash.Builder` is just a builder for a [Plug](https://hexdocs.pm/plug/readme.html), it can be integrated into either a `Plug.Router` ***or*** a [Phoenix](https://phoenixframework.org/) application.
 
-### Example Usage
+### Usage with Plug Router
+
+##### 1. Define your Slack Router plug using `Slash.Builder`.
 
 ```elixir
-defmodule SlackBot.SlackRouter do
+defmodule Bot.SlackRouter do
   use Slash.Builder
 
-  @help """
-  Greets a user
+  command :async_greet, fn command ->
+    async(command, fn ->
+      Process.sleep(5_000)
 
-  Example: `/hello bob`
-  """
-  command fn %Command{args: [name | []]} ->
-    "Greetings #{name}!"
+      "Async response!"
+    end)
   end
-end
 
-defmodule SlackBot.Router do
-  use Plug.Router
+  command :greet, fn %{args: args} ->
+    case args do
+      [name] ->
+        "Greetings #{name}!"
 
-  plug :match
-  plug Plug.Parsers, parsers: [:json],
-                     pass:  ["application/json"],
-                     json_decoder: Jason
-  plug :dispatch
-
-  forward "/slack", to: SlackBot.SlackRouter
+      _ ->
+        "Please pass a name to greet!"
+    end
+  end
 end
 ```
 
-<!-- moduledoc -->
+##### 2. Define your Plug Router
+
+```elixir
+defmodule Bot.Router do
+  use Plug.Router
+
+  # NOTE: The custom body_reader option here is critical.
+  plug Plug.Parsers,
+    parsers: [:urlencoded],
+    body_reader: {Slash.BodyReader, :read_body, []}
+
+  plug :match
+  plug :dispatch
+
+  forward "/slack", to: Bot.SlackRouter
+
+  match _ do
+    send_resp(conn, 404, "")
+  end
+end
+
+```
+
+### Usage with Phoenix
+
+##### 1. Define your Slash Router plug using `Slash.Builder` like above.
+
+##### 2. Add a new scope *or* use an existing scope in your `Phoenix.Router`
+
+```elixir
+scope "/" do
+  pipe_through [:api]
+
+  forward "/slack", ShieldSlack.Router
+end
+```
+
+##### 3. Override the body reader in your `Phoenix.Endpoint`
+
+```elixir
+plug Plug.Parsers,
+  parsers: [:urlencoded, :multipart, :json],
+  pass: ["*/*"],
+  body_reader: {Slash.BodyReader, :read_body, []}
+```
 
 ## License (MIT)
 
