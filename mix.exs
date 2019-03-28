@@ -1,7 +1,7 @@
 defmodule Slash.Mixfile do
   use Mix.Project
 
-  @version "2.0.0-rc.7"
+  @version "2.0.0-rc.8"
 
   def project do
     [
