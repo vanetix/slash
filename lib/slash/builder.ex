@@ -33,6 +33,15 @@ defmodule Slash.Builder do
         end
       end
 
+
+  ## Configuration
+
+  In order to verify the Slack signature using `Slash.Signature`, the following will need to be
+  configured for each router that was built with `Slack.Builder`.
+
+      config :slash, Bot.SlackRouter,
+        signing_key: "secret key from slack"
+
   """
 
   require Logger

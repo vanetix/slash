@@ -101,6 +101,16 @@ plug Plug.Parsers,
   body_reader: {Slash.BodyReader, :read_body, []}
 ```
 
+## Configuration
+
+Assuming you've setup the above `Bot.SlackRouter` module in your mix project. To configure the Slack signature key, configure your builder module using the following:
+
+```elixir
+config :slash, Bot.SlackRouter,
+  signing_key: "secret key from slack"
+```
+
+
 ## License (MIT)
 
 Copyright (c) 2017-2019 Matt McFarland
