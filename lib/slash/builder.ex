@@ -127,7 +127,7 @@ defmodule Slash.Builder do
     before_functions = Module.get_attribute(module, :before_functions)
 
     commands_ast = compile_commands(commands, router_opts)
-    before_functions_ast = compile_before_functions(module, before_functions)
+    before_functions_ast = compile_before_functions(module, before_functions, router_opts)
 
     quote location: :keep do
       unquote(commands_ast)
@@ -168,49 +168,87 @@ defmodule Slash.Builder do
   The `function_name` should be a reference to the name of the function on the current module.
   Values returned from a before function should match the `t:before_response/0` type.
   """
-  @spec before(atom()) :: Macro.t()
-  defmacro before(function_name) when is_atom(function_name) do
+  @spec before(Macro.t()) :: Macro.t()
+  defmacro before({:when, _meta, [function_name, guards]}), do: before(function_name, guards)
+
+  defmacro before(function_name) when is_atom(function_name),
+    do: before(function_name, true)
+
+  defp before(function_name, guards) do
     quote do
-      @before_functions unquote(function_name)
+      @before_functions {unquote(function_name), unquote(Macro.escape(guards))}
     end
   end
 
   # Compiles all before commands using a recursive case statement.
-  defp compile_before_functions(module, functions) do
-    result = quote do: {:ok, command}
+  defp compile_before_functions(module, functions, opts) do
+    formatter = opts[:formatter]
+    result = quote do: {:ok, cmd}
 
     before_chain =
-      functions
-      |> Enum.map(fn function_name ->
-        unless Module.defines?(module, {function_name, 1}) do
-          raise ArgumentError,
-                "Expected #{module} to define #{function_name}(%Command{})."
-        end
+      Enum.reduce(functions, result, &compile_before_function(module, formatter, &1, &2))
 
-        quote do: unquote(function_name)
-      end)
-      |> Enum.reduce(result, fn function, acc ->
-        quote do
-          case unquote(function)(command) do
-            {:ok, command} ->
-              unquote(acc)
+    quote do
+      def run_before_functions(cmd) do
+        var!(command) = cmd.command
+        _ = var!(command)
 
-            {:error, message} ->
-              {:error, message}
+        unquote(before_chain)
+      end
+    end
+  end
 
-            result ->
-              raise ArgumentError, """
-              Expected before handler #{unquote(function)} to return `{:ok, %Command{}}` or `{:error, "message"}`.
+  defp compile_before_function(module, formatter, {function_name, guards}, acc) do
+    function = quote do: unquote(function_name)(cmd)
 
-              Got #{inspect(result)}.
-              """
-          end
+    unless Module.defines?(module, {function_name, 1}) do
+      raise ArgumentError,
+            "Expected #{module} to define #{function_name}(%Command{})."
+    end
+
+    function_with_guards =
+      quote do
+        unquote(compile_before_guards(function, guards, formatter))
+      end
+
+    quote do
+      case unquote(function_with_guards) do
+        {:ok, cmd} ->
+          unquote(acc)
+
+        {:error, message} ->
+          {:error, message}
+
+        result ->
+          raise ArgumentError, """
+          Expected before handler #{unquote(function_name)} to return `{:ok, %Command{}}` or `{:error, "message"}`.
+
+          Got #{inspect(result)}.
+          """
+      end
+    end
+  end
+
+  defp compile_before_guards(function, true, _formatter), do: function
+
+  defp compile_before_guards(function, guards, formatter) do
+    guards =
+      Macro.prewalk(guards, fn ast ->
+        case ast do
+          ast when is_list(ast) ->
+            ast
+            |> Enum.map(&to_string/1)
+            |> Enum.map(&formatter.to_command_name/1)
+
+          ast ->
+            ast
         end
       end)
 
     quote do
-      def run_before_functions(command) do
-        unquote(before_chain)
+      case true do
+        true when unquote(guards) -> unquote(function)
+        true -> {:ok, cmd}
       end
     end
   end

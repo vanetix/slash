@@ -32,6 +32,29 @@ defmodule Slash.BuilderTest do
     end
   end
 
+  defmodule BeforeGuardMock do
+    use Slash.Builder
+
+    before :error when command not in [:greet, :tell]
+    before :data when command in [:greet]
+
+    def error(_command) do
+      {:error, "Something went wrong"}
+    end
+
+    def data(%Command{} = command) do
+      {:ok, put_data(command, :data, :data)}
+    end
+
+    command :tell, fn _ ->
+      "Success"
+    end
+
+    command :greet, fn %Command{data: %{data: :data}} ->
+      "Hello"
+    end
+  end
+
   defmodule MapResponseMock do
     use Slash.Builder
 
@@ -104,6 +127,28 @@ defmodule Slash.BuilderTest do
 
       assert %Plug.Conn{resp_body: body} = conn
       assert body =~ ~r/slack supports the following commands/i
+    end
+  end
+
+  describe "router with before guard clauses" do
+    test "should put data into command struct when calling tell", %{conn: conn} do
+      conn =
+        conn
+        |> send_command(BeforeGuardMock, "tell")
+        |> BeforeGuardMock.call([])
+
+      assert %Plug.Conn{resp_body: body} = conn
+      assert body =~ ~r/Success/
+    end
+
+    test "should return error when calling greet", %{conn: conn} do
+      conn =
+        conn
+        |> send_command(BeforeGuardMock, "greet")
+        |> BeforeGuardMock.call([])
+
+      assert %Plug.Conn{resp_body: body} = conn
+      assert body =~ ~r/Hello/
     end
   end
 
