@@ -110,6 +110,9 @@ config :slash, Bot.SlackRouter,
   signing_key: "secret key from slack"
 ```
 
+## Testing
+
+See the `Slash.Test` module for more information in testing `Slash.Builder` plugs.
 
 ## License (MIT)
 
