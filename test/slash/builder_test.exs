@@ -92,6 +92,16 @@ defmodule Slash.BuilderTest do
     end
   end
 
+  defmodule InvalidResultMock do
+    use Slash.Builder
+
+    before :error
+
+    def error(_command) do
+      {:ok, :nope}
+    end
+  end
+
   setup _ do
     {:ok, conn: conn(:post, "/", %{})}
   end
@@ -201,6 +211,16 @@ defmodule Slash.BuilderTest do
 
       assert %Plug.Conn{status: 200} = conn
       assert_receive :ok
+    end
+  end
+
+  describe "router with invalid before handler result" do
+    test "should raise an argument error", %{conn: conn} do
+      assert_raise ArgumentError, fn ->
+        conn
+        |> send_command(InvalidResultMock, "noop")
+        |> InvalidResultMock.call([])
+      end
     end
   end
 end

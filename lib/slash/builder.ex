@@ -213,7 +213,7 @@ defmodule Slash.Builder do
 
     quote do
       case unquote(function_with_guards) do
-        {:ok, cmd} ->
+        {:ok, %Command{} = cmd} ->
           unquote(acc)
 
         {:error, message} ->
