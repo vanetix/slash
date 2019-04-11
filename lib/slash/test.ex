@@ -52,7 +52,7 @@ defmodule Slash.Test do
   Builds a `%Conn{}` body for a specific Slack command payload. The optional `overrides` map
   can be passed which will be merged with default params.
 
-  ***If a `:signer_key` has not been configured for the test module, a key will be generated and
+  ***If a `:signing_key` has not been configured for the test module, a key will be generated and
   put into the application environment.***
 
   NOTE: This is a little awkward right now due to having to send the mock module as an argument.
@@ -74,7 +74,7 @@ defmodule Slash.Test do
 
     signature =
       module
-      |> maybe_put_signer_key()
+      |> maybe_put_signing_key()
       |> Signature.generate(timestamp, encoded_params)
 
     conn
@@ -91,7 +91,7 @@ defmodule Slash.Test do
     |> Base.encode16(case: :lower)
   end
 
-  defp maybe_put_signer_key(module) do
+  defp maybe_put_signing_key(module) do
     :slash
     |> Application.get_env(module, [])
     |> Keyword.get(:signing_key)
