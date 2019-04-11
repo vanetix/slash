@@ -21,6 +21,19 @@ defmodule Slash.Test do
           assert %Plug.Conn{resp_body: body} = conn
           assert %{"text" => "Hello world!"} = Jason.decode!(body)
         end
+
+        test "should authenticate user" do
+          user_id = "slack user id"
+
+          conn =
+            :post
+            |> conn("/", %{})
+            |> send_command(SlackRouter, "login", %{"user_id" => user_id)
+            |> SlackRouter.call([])
+
+          assert %Plug.Conn{resp_body: body} = conn
+          assert %{"text" => "You're authenticated!"} = Jason.decode!(body)
+        end
       end
 
   """
@@ -36,16 +49,22 @@ defmodule Slash.Test do
   end
 
   @doc """
-  Builds a `%Conn{}` body for a specific Slack command payload.
+  Builds a `%Conn{}` body for a specific Slack command payload. The optional `overrides` map
+  can be passed which will be merged with default params.
 
   ***If a `:signer_key` has not been configured for the test module, a key will be generated and
   put into the application environment.***
 
   NOTE: This is a little awkward right now due to having to send the mock module as an argument.
   """
-  @spec send_command(Conn.t(), module :: atom(), command :: String.t()) :: Conn.t()
-  def send_command(%Conn{} = conn, module, command) do
-    params = build_params(command)
+  @spec send_command(
+          Conn.t(),
+          module :: atom(),
+          command :: String.t(),
+          overrides :: %{optional(String.t()) => term()}
+        ) :: Conn.t()
+  def send_command(%Conn{} = conn, module, command, overrides \\ %{}) do
+    params = build_params(command, overrides)
     encoded_params = URI.encode_query(params)
 
     timestamp =
@@ -89,7 +108,7 @@ defmodule Slash.Test do
     end
   end
 
-  defp build_params(text) do
+  defp build_params(text, overrides) do
     %{
       "text" => text,
       "channel_id" => "channel_id",
@@ -103,5 +122,6 @@ defmodule Slash.Test do
       "user_id" => "user_id",
       "user_name" => "user_name"
     }
+    |> Map.merge(overrides)
   end
 end
