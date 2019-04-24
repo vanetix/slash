@@ -28,7 +28,7 @@ defmodule Slash.Test do
           conn =
             :post
             |> conn("/", %{})
-            |> send_command(SlackRouter, "login", %{"user_id" => user_id)
+            |> send_command(SlackRouter, "login", %{"user_id" => user_id})
             |> SlackRouter.call([])
 
           assert %Plug.Conn{resp_body: body} = conn
