@@ -110,6 +110,23 @@ config :slash, Bot.SlackRouter,
   signing_key: "secret key from slack"
 ```
 
+## Slack Help Generation
+
+Another feature of this library is the ability to automatically generate help documentation and the `help` command itself. To generate per-command help text, simply decorate your command functions with a `@help` module parameter.
+
+Here is an example:
+
+```elixir
+  @help """
+  Generates a sweet gif
+
+  Example: '/gif make'
+  """
+  command(:make, fn _command) do
+    # some code
+  end
+```
+
 ## Testing
 
 See the `Slash.Test` module for more information in testing `Slash.Builder` plugs.
