@@ -122,7 +122,7 @@ Here is an example:
 
   Example: '/gif make'
   """
-  command(:make, fn _command) do
+  command :make, fn _command  do
     # some code
   end
 ```
