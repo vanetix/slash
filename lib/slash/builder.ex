@@ -4,10 +4,58 @@ defmodule Slash.Builder do
   [Plug](https://hexdocs.pm/plug/readme.html) pipeline.
 
   The main macro provided when using the module is `command/2`, which allows you to declare
-  commands for your Slash plug.
+  commands for your Slash plug. Additionally the `before/1` macro configures a function to be
+  executed prior to matching a command. These functions can be used to authenticate users, verify
+  authorized channels, or similiar.
+
+
+  ## Usage
+
+  Additional options can be passed when using the module. Accepted options are:
+  - `name` - name of the Slack router, the only place this is currently used is in help text
+    generation.
+  - `formatter` - a custom `Slash.Formatter` implementation you should like to use in place of the
+    default `Slash.Formatter.Dasherized`.
+
+
+  ## Configuration
+
+  In order to verify the Slack signature using `Slash.Signature`, the following will need to be
+  configured for each router that was built with `Slack.Builder`.
+
+      config :slash, Bot.SlackRouter,
+        signing_key: "secret key from slack"
+
+
+  ## Help generation
+
+  Slash automatically builds out a help subcommand which can be invoked with `/bot help`, and
+  will display basic commands available by default. If you want to customize this functionality
+  you can use the `@help` module attribute.
+
+      defmodule Bot.SlackRouter do
+        use Slash.Builder
+
+        @help "Sends you a hearty hello!"
+        command :greet, fn _command ->
+          "Hello!"
+        end
+      end
+
 
   ## Examples
 
+  ### Basic
+
+      defmodule Bot.SlackRouter do
+        use Slash.Builder, name: "Custom Bot", formatter: MyCustomFormatter
+
+        command :greet, fn _command ->
+          "Greetings!"
+        end
+      end
+
+  ### Before Handler
       defmodule Bot.SlackRouter do
         use Slash.Builder
 
@@ -32,15 +80,6 @@ defmodule Slash.Builder do
           end
         end
       end
-
-
-  ## Configuration
-
-  In order to verify the Slack signature using `Slash.Signature`, the following will need to be
-  configured for each router that was built with `Slack.Builder`.
-
-      config :slash, Bot.SlackRouter,
-        signing_key: "secret key from slack"
 
   """
 
