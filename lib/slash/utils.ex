@@ -8,7 +8,7 @@ defmodule Slash.Utils do
   @doc """
   Sends a json response to the `conn`.
   """
-  @spec send_json(Conn.t(), map(), number()) :: Conn.t()
+  @spec send_json(Conn.t(), map() | String.t(), number()) :: Conn.t()
   def send_json(conn, response, status \\ 200)
 
   def send_json(conn, response, status) when is_binary(response) do
