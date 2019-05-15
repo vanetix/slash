@@ -158,9 +158,14 @@ defmodule Slash.Command do
           send_response(command, message)
 
         {:exit, _} ->
+          message =
+            %{text: "There was an error processing that command!"}
+            |> Utils.build_response_payload()
+            |> Jason.encode!()
+
           Logger.error("Failed to send response for async command - #{command.command}.")
 
-          send_response(command, %{text: "There was an error processing that command!"})
+          send_response(command, message)
       end
     end)
 
