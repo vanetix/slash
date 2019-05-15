@@ -159,6 +159,8 @@ defmodule Slash.Command do
 
         {:exit, _} ->
           Logger.error("Failed to send response for async command - #{command.command}.")
+
+          send_response(command, "There was an error processing that command!")
       end
     end)
 

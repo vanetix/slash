@@ -21,7 +21,7 @@ defmodule Slash.Utils do
   @spec build_response_payload(Slash.Builder.command_response()) :: map()
   def build_response_payload(response) when is_binary(response), do: %{text: response}
   def build_response_payload(response) when is_map(response), do: response
-  def build_response_payload(:async), do: ""
+  def build_response_payload(:async), do: %{text: ""}
 
   def build_response_payload(response) do
     raise ArgumentError, """
