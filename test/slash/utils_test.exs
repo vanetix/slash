@@ -28,7 +28,7 @@ defmodule Slash.UtilsTest do
     end
 
     test "should build async payload" do
-      assert "" = build_response_payload(:async)
+      assert %{text: ""} = build_response_payload(:async)
     end
 
     test "should raise for other types" do
