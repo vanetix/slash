@@ -102,7 +102,7 @@ defmodule Slash.Command do
   end
 
   @doc """
-  Responses to the `%Command{}` with `message`.
+  Responds to the `%Command{}` with `message`.
 
   *Note, this is for internal usage with async commands. Please see `Slash.Builder` for
   valid return types from command functions.*
@@ -160,7 +160,7 @@ defmodule Slash.Command do
         {:exit, _} ->
           Logger.error("Failed to send response for async command - #{command.command}.")
 
-          send_response(command, "There was an error processing that command!")
+          send_response(command, %{text: "There was an error processing that command!"})
       end
     end)
 
