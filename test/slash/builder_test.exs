@@ -102,6 +102,20 @@ defmodule Slash.BuilderTest do
     end
   end
 
+  defmodule DefaultCommandMock do
+    use Slash.Builder
+
+    before :error when command in [:print]
+
+    def error(_) do
+      throw(:not_implemented)
+    end
+
+    command fn %{text: text} ->
+      text
+    end
+  end
+
   setup _ do
     {:ok, conn: conn(:post, "/", %{})}
   end
@@ -221,6 +235,18 @@ defmodule Slash.BuilderTest do
         |> send_command(InvalidResultMock, "noop")
         |> InvalidResultMock.call([])
       end
+    end
+  end
+
+  describe "router with default command block" do
+    test "should route all commands to default command", %{conn: conn} do
+      conn =
+        conn
+        |> send_command(DefaultCommandMock, "command")
+        |> DefaultCommandMock.call([])
+
+      assert %Plug.Conn{resp_body: body} = conn
+      assert %{"text" => "command"} = Jason.decode!(body)
     end
   end
 end

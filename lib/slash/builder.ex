@@ -200,6 +200,31 @@ defmodule Slash.Builder do
     end
   end
 
+  @doc ~S"""
+  Defines a command that does not handle a specific command. This block will always be executed
+  if it is the only `command` block defined. This can be used for fall-through routes, or custom
+  functionality that `Slash` might not implemented (for example command in the style
+  `/bot <dynamic arg>`).
+
+  ### Example
+
+      command fn(%{text: text}) ->
+        "Sorry, I don't understand #{text}."
+      end
+  """
+  @spec command((Command.t() -> command_response())) :: Macro.t()
+  defmacro command(func) do
+    func = Macro.escape(func)
+
+    quote bind_quoted: [func: func] do
+      help_text = Module.get_attribute(__MODULE__, :help)
+
+      Module.delete_attribute(__MODULE__, :help)
+
+      @commands {func, help_text}
+    end
+  end
+
   @doc """
   Defines a function to be executed before the command is routed to the appropriate handler
   function.
@@ -303,6 +328,14 @@ defmodule Slash.Builder do
     formatter = opts[:formatter]
     help_ast = compile_help(commands, opts)
 
+    default_clause =
+      commands
+      |> Enum.find(fn
+        {_, _} -> true
+        _ -> false
+      end)
+      |> compile_default_command()
+
     ast =
       for {name, func, _help} <- commands do
         name
@@ -313,6 +346,8 @@ defmodule Slash.Builder do
 
     quote do
       unquote(ast)
+      unquote(default_clause)
+
       unquote(help_ast)
     end
   end
@@ -325,16 +360,26 @@ defmodule Slash.Builder do
     help_text =
       commands
       |> Enum.sort_by(&elem(&1, 0))
-      |> Enum.map(fn {name, _func, help} ->
-        help = help || "No help text provided."
+      |> Enum.map(fn command ->
+        {name, help} =
+          case command do
+            {name, _func, help} ->
+              humanized_name =
+                name
+                |> to_string()
+                |> formatter.to_command_name()
 
-        humanized_name =
-          name
-          |> to_string()
-          |> formatter.to_command_name()
+              {humanized_name, help}
 
+            {_func, help} ->
+              {"<command>", help}
+          end
+
+        {name, help || "No help text provided."}
+      end)
+      |> Enum.map(fn {name, help} ->
         %{
-          title: humanized_name,
+          title: name,
           text: "```#{help}```",
           mrkdwn_in: ["text"],
           color: "#00d1b2"
@@ -343,7 +388,7 @@ defmodule Slash.Builder do
       |> Macro.escape()
 
     quote do
-      def match_command(_help, _command) do
+      def match_help(_) do
         %{
           text: unquote(name) <> " supports the following commands:",
           attachments: unquote(help_text)
@@ -352,12 +397,21 @@ defmodule Slash.Builder do
     end
   end
 
+  # Compiles a default fallback clause
+  defp compile_default_command(nil) do
+    quote do
+      def match_command(_, command), do: apply(__MODULE__, :match_help, [""])
+    end
+  end
+
+  defp compile_default_command({func, _help}) do
+    quote do
+      def match_command(_, command), do: unquote(func).(command)
+    end
+  end
+
   # Compiles an AST for a specific command
   defp compile_command(name, func) do
-    if name == "help" do
-      IO.puts("Warning: defining a `help` command will override the default help generation.")
-    end
-
     quote do
       def match_command(unquote(name), command), do: unquote(func).(command)
     end
