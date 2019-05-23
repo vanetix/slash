@@ -1,4 +1,5 @@
 locals_without_parens = [
+  async: 2,
   before: 1,
   command: 2
 ]
