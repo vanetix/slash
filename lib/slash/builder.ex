@@ -357,7 +357,7 @@ defmodule Slash.Builder do
     name = opts[:name]
     formatter = opts[:formatter]
 
-    help_text =
+    help_commands =
       commands
       |> Enum.sort_by(&elem(&1, 0))
       |> Enum.map(fn command ->
@@ -377,21 +377,57 @@ defmodule Slash.Builder do
 
         {name, help || "No help text provided."}
       end)
-      |> Enum.map(fn {name, help} ->
-        %{
-          title: name,
-          text: "```#{help}```",
-          mrkdwn_in: ["text"],
-          color: "#00d1b2"
-        }
+      |> Enum.map(fn {command, help} ->
+        blocks = [
+          %{
+            type: "context",
+            elements: [
+              %{
+                type: "mrkdwn",
+                text: "_*/#{String.downcase(name)} #{command}*_"
+              }
+            ]
+          },
+          %{
+            type: "section",
+            text: %{
+              type: "mrkdwn",
+              text: help
+            }
+          }
+        ]
+
+        {command, blocks}
       end)
       |> Macro.escape()
 
+    help_function_ast =
+      for {name, blocks} <- help_commands do
+        quote do
+          def match_help(unquote(name)), do: %{blocks: unquote(blocks)}
+        end
+      end
+
     quote do
+      unquote(help_function_ast)
+
       def match_help(_) do
+        blocks = Enum.map(unquote(help_commands), &elem(&1, 1))
+
         %{
-          text: unquote(name) <> " supports the following commands:",
-          attachments: unquote(help_text)
+          blocks:
+            [
+              %{
+                type: "section",
+                text: %{
+                  type: "mrkdwn",
+                  text: "*_" <> unquote(name) <> " supports the following commands_*:"
+                }
+              }
+              | blocks
+            ]
+            |> Enum.intersperse(%{type: "divider"})
+            |> List.flatten()
         }
       end
     end
@@ -406,6 +442,7 @@ defmodule Slash.Builder do
 
   defp compile_default_command({func, _help}) do
     quote do
+      def match_command("help", _command), do: apply(__MODULE__, :match_help, [""])
       def match_command(_, command), do: unquote(func).(command)
     end
   end
